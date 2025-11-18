@@ -1,5 +1,6 @@
 package com.example.weatherapp.views.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -14,9 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.weatherapp.R
 import com.example.weatherapp.models.WeatherModel
 import java.util.Date
 
@@ -55,8 +59,18 @@ fun WeatherRowItem(weather: WeatherModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = weather.description, fontWeight = FontWeight.Bold)
-                Text(text = "${weather.temperature}C")
+                Column {
+                    Image(
+                        painter = painterResource(id = weather.icon),
+                        contentDescription = weather.description,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+
+                        text = weather.description, fontWeight = FontWeight.Bold)
+                }
+                Text(text = "${weather.temperature} °C")
             }
         }
 
@@ -67,11 +81,11 @@ fun WeatherRowItem(weather: WeatherModel) {
 @Composable
 fun WeatherListComponentPreview() {
     val fakeForecast = listOf(
-        WeatherModel(1f, Date(), "Snowy", "01"),
-        WeatherModel(2f, Date(), "Cloudy", "02"),
-        WeatherModel(3f, Date(), "Sunny", "03"),
-        WeatherModel(4f, Date(), "Cloudy", "02"),
-        WeatherModel(5f, Date(), "Snowy", "01"),
+        WeatherModel(1f, Date(), "Snowy", R.drawable.ic_26_snoefall),
+        WeatherModel(2f, Date(), "Cloudy", R.drawable.ic_04_molnigt),
+        WeatherModel(3f, Date(), "Sunny", R.drawable.ic_01_klart),
+        WeatherModel(4f, Date(), "Fog", R.drawable.ic_07_dimma),
+        WeatherModel(5f, Date(), "Thunderstorm", R.drawable.ic_21_aaska),
     )
     Column {
         WeatherListComponent(forecastData = fakeForecast)

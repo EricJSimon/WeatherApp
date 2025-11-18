@@ -1,6 +1,7 @@
 package com.example.weatherapp.repositories
 
 import android.util.Log
+import com.example.weatherapp.R
 import com.example.weatherapp.models.WeatherModel
 import com.example.weatherapp.models.network.ForecastApiResponse
 import com.example.weatherapp.models.network.TimeSeriesData
@@ -25,15 +26,16 @@ class WeatherRepository {
         }
     }
 
-    suspend fun getWeatherData(): List<WeatherModel> {
-        val url = "https://maceo.sth.kth.se/weather/forecast?lonLat=lon/14.333/lat/60.383"
+    suspend fun getWeatherData(lon: Float, lat: Float): List<WeatherModel> {
+        //https://maceo.sth.kth.se/weather/forecast?lonLat=lon/14.333/lat/60.383" Default
+        val url = "https://maceo.sth.kth.se/weather/forecast?lonLat=lon/$lon/lat/$lat"
 
         try {
             val apiResponse = client.get(url).body<ForecastApiResponse>()
 
             return mapResponseToWeatherModel(apiResponse.timeSeries)
         } catch (e: Exception) {
-            Log.e("API_ERROR_REQUEST","url request failed",e)
+            Log.e("API_ERROR_REQUEST", "url request failed", e)
             e.printStackTrace()
             return emptyList()
         }
@@ -102,7 +104,23 @@ class WeatherRepository {
         }
     }
 
-    private fun mapSymbolToIcon(symbolCode: Int?): String {
-        return symbolCode?.toString() ?: "unknown"
+    private fun mapSymbolToIcon(symbolCode: Int?): Int {
+        return when (symbolCode) {
+            1 -> R.drawable.ic_01_klart
+            2 -> R.drawable.ic_02_laettmolnighet
+            3 -> R.drawable.ic_03_halvklart
+            4 -> R.drawable.ic_03_halvklart
+            5 -> R.drawable.ic_04_molnigt
+            6 -> R.drawable.ic_06_mulet
+            7 -> R.drawable.ic_07_dimma
+            8 -> R.drawable.ic_08_laettregnskur
+            9 -> R.drawable.ic_09_regnskur
+            10 -> R.drawable.ic_10_kraftigregnskur
+            11 -> R.drawable.ic_11_aaskskur
+            18 -> R.drawable.ic_18_laettregn
+            19 -> R.drawable.ic_19_regn
+            20 -> R.drawable.ic_20_kraftigtregn
+            else -> R.drawable.ic_00_unkownweather
+        }
     }
 }
