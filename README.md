@@ -9,11 +9,11 @@ General
 
 This assignment will be completed in groups of two students who have successfully passed Lab 1.1.
 To ensure the quality of your work, please adhere to the following guidelines:
-• The solution should be organized in a set of appropriate classes.
-• Names of classes, methods and fields should describe their usage.
-• Structure and document your code effectively. It is required to follow the MVVM (Model-
+- The solution should be organized in a set of appropriate classes.
+- Names of classes, methods and fields should describe their usage.
+- Structure and document your code effectively. It is required to follow the MVVM (Model-
 View-ViewModel) architecture.
-• NB! It is mandatory to submit your source code at least a day prior to your presentation.
+- NB! It is mandatory to submit your source code at least a day prior to your presentation.
 
 
 The app
@@ -51,12 +51,13 @@ inputting longitude and latitude manually, you should use a second API to conver
 coordinates. For this you can use the following APIs:
 1. Swedish places: https://www.smhi.se/wpta/backend_solr/autocomplete/search/{place}
 2. International places: https://geocode.maps.co/search?q={place}
+
 Furthermore, you should implement at least two of the following points:
-• Use the Retrofit library to get and process your API response [Android only].
-• Group the received data so that detailed (hourly) data is shown for today, and less detailed
+- Use the Retrofit library to get and process your API response [Android only].
+- Group the received data so that detailed (hourly) data is shown for today, and less detailed
 (maybe a daily overview) is shown for the other days.
-• The ability to mark places as favourite and have a different quick view for these favourites.
-• Adding a settings screen in which the user is allowed to define the refresh rate and other
+- The ability to mark places as favourite and have a different quick view for these favourites.
+- Adding a settings screen in which the user is allowed to define the refresh rate and other
 preferences regarding the UI.
 
 
