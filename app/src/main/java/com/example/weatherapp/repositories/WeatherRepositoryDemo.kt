@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class WeatherRepository {
+class WeatherRepositoryDemo {
 
     private val client = HttpClient {
         install(ContentNegotiation) {
@@ -27,7 +27,6 @@ class WeatherRepository {
     }
 
     suspend fun getWeatherData(lon: Float, lat: Float): List<WeatherModel> {
-        //https://maceo.sth.kth.se/weather/forecast?lonLat=lon/14.333/lat/60.383" Default
         val url = "https://maceo.sth.kth.se/weather/forecast?lonLat=lon/$lon/lat/$lat"
 
         try {

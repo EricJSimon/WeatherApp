@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.R
 import com.example.weatherapp.models.WeatherModel
-import com.example.weatherapp.repositories.WeatherRepository
+import com.example.weatherapp.repositories.WeatherRepositoryOpenMeteo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -14,6 +14,7 @@ import java.util.Date
 interface InterfaceWeatherViewModel {
     val weeklyForecast: StateFlow<List<WeatherModel>>
     fun updateLocation(lon: Float, lat: Float)
+
 }
 
 class WeatherViewModel : ViewModel(), InterfaceWeatherViewModel {
@@ -24,12 +25,8 @@ class WeatherViewModel : ViewModel(), InterfaceWeatherViewModel {
         fetchWeatherData(lon, lat)
     }
 
-    private val repository = WeatherRepository()
-
-    init {
-        fetchWeatherData(0.0f, 0.0f)
-    }
-
+    //private val repository = WeatherRepositoryDemo()
+    private val repository = WeatherRepositoryOpenMeteo()
     private fun fetchWeatherData(lat: Float, lon: Float) {
         viewModelScope.launch {
             val data = repository.getWeatherData(lat, lon)
