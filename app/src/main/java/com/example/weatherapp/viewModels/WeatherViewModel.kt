@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.R
+import com.example.weatherapp.models.DailyWeatherModel
+import com.example.weatherapp.models.GroupedForecast
 import com.example.weatherapp.models.LocationModel
 import com.example.weatherapp.models.WeatherModel
 import com.example.weatherapp.repositories.WeatherRepositoryOpenMeteo
@@ -12,7 +14,10 @@ import com.example.weatherapp.services.GeolocationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.Date
+import kotlin.collections.eachCount
+import kotlin.collections.maxByOrNull
 
 /**
  * This is the ViewModel class that handles
@@ -23,12 +28,16 @@ import java.util.Date
  */
 interface InterfaceWeatherViewModel {
     val locationModel: StateFlow<LocationModel?>
+    val groupedForecast: StateFlow<GroupedForecast?>
     fun updateLocationByName(address: String)
 
 }
 
 class WeatherViewModel(application: Application) : AndroidViewModel(application),
     InterfaceWeatherViewModel {
+
+    private val _groupedForecast = MutableStateFlow<GroupedForecast?>(null)
+    override val groupedForecast: StateFlow<GroupedForecast?> = _groupedForecast
     private var _locationModel = MutableStateFlow<LocationModel?>(null)
     override val locationModel: StateFlow<LocationModel?> = _locationModel
 
@@ -39,10 +48,49 @@ class WeatherViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val data = repository.getWeatherDataByAddress(address)
             _locationModel.value = data
-            if (data == null) {
+
+            if (data != null) {
+                _groupedForecast.value = groupAndSummarizeForecast(data.hourlyWeather)
+            } else {
+                _groupedForecast.value = null
                 Log.w("WeatherViewModel", "No data found for $address")
             }
+            Log.d("API_DATA", "Updated forecast: $data")
         }
+    }
+
+    private fun groupAndSummarizeForecast(hourlyData: List<WeatherModel>): GroupedForecast {
+        val groupedByDay = hourlyData.groupBy {
+            val cal = Calendar.getInstance()
+            cal.time = it.date
+            cal.get(Calendar.DAY_OF_YEAR)
+        }
+
+        val sortedDays = groupedByDay.keys.sorted()
+
+        val todayKey = sortedDays.firstOrNull()
+        val todayHourly = todayKey?.let { groupedByDay[it] } ?: emptyList()
+
+        val upcomingDaysSummarized = sortedDays.drop(1).mapNotNull { dayKey ->
+            val dayHourlyList = groupedByDay[dayKey]
+            if (dayHourlyList.isNullOrEmpty()) {
+                null
+            } else {
+                DailyWeatherModel(
+                    date = dayHourlyList.first().date,
+                    maxTemp = dayHourlyList.maxOf { it.temperature },
+                    minTemp = dayHourlyList.minOf { it.temperature },
+                    dominantIcon = dayHourlyList.groupingBy { it.icon }.eachCount()
+                        .maxByOrNull { it.value }?.key ?: dayHourlyList.first().icon,
+                    dominantDescription = dayHourlyList.groupingBy { it.description }.eachCount()
+                        .maxByOrNull { it.value }?.key ?: dayHourlyList.first().description
+                )
+            }
+        }
+        return GroupedForecast(
+            todayHourly = todayHourly,
+            upcomingDays = upcomingDaysSummarized
+        )
     }
 }
 
@@ -59,6 +107,7 @@ class FakeViewModelInterface : InterfaceWeatherViewModel {
             )
         )
     )
+    override val groupedForecast: StateFlow<GroupedForecast?> = MutableStateFlow(null)
 
     override fun updateLocationByName(address: String) {}
 }

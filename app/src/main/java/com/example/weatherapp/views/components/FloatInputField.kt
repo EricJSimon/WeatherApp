@@ -35,7 +35,7 @@ fun FloatInputField(
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun FloatInputFieldPreview() {
     FloatInputField(

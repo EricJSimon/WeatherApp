@@ -32,17 +32,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.viewModels.FakeViewModelInterface
 import com.example.weatherapp.viewModels.InterfaceWeatherViewModel
-import com.example.weatherapp.views.components.WeatherListComponent
+import com.example.weatherapp.views.components.GroupedWeatherListComponent
 
 /**
- * Main HomeScreen for this APP
+ * Main HomeScreen for this APP.
+ * Weather data by Open-Meteo.com
+ * https://open-meteo.com/
  *
  * @author Simonms
  *
  */
 @Composable
 fun HomeScreen(weatherViewModel: InterfaceWeatherViewModel) {
-    val forecast by weatherViewModel.locationModel.collectAsState()
+    val locationModel by weatherViewModel.locationModel.collectAsState()
+    val groupedForecast by weatherViewModel.groupedForecast.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
     var addressText by remember { mutableStateOf("") }
@@ -84,16 +87,18 @@ fun HomeScreen(weatherViewModel: InterfaceWeatherViewModel) {
             modifier = Modifier.padding(innerPadding), contentAlignment = Alignment.Center
         ) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = forecast?.locationName ?: "Weather Forecast",
+                    text = locationModel?.locationName ?: "Weather Forecast",
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(16.dp)
                 )
-                forecast?.hourlyWeather?.let { weatherList ->
-                    WeatherListComponent(forecastData = weatherList)
+                groupedForecast?.let { forecast ->
+                    GroupedWeatherListComponent(groupedForecast = forecast)
                 }
             }
         }
