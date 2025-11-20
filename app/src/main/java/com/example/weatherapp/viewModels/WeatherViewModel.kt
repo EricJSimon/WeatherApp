@@ -1,46 +1,56 @@
 package com.example.weatherapp.viewModels
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.R
+import com.example.weatherapp.models.LocationModel
 import com.example.weatherapp.models.WeatherModel
 import com.example.weatherapp.repositories.WeatherRepositoryOpenMeteo
+import com.example.weatherapp.services.GeolocationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.Date
 
+/**
+ * This is the ViewModel class that handles
+ * communication between models, repositories and HomeScreen
+ *
+ * @author Simonms
+ *
+ */
 interface InterfaceWeatherViewModel {
-    val weeklyForecast: StateFlow<List<WeatherModel>>
-    fun updateLocation(lon: Float, lat: Float)
+    val locationModel: StateFlow<LocationModel?>
+    fun updateLocationByName(address: String)
 
 }
 
-class WeatherViewModel : ViewModel(), InterfaceWeatherViewModel {
-    private val _weeklyForecast = MutableStateFlow<List<WeatherModel>>(emptyList())
-    override val weeklyForecast: StateFlow<List<WeatherModel>> = _weeklyForecast
+class WeatherViewModel(application: Application) : AndroidViewModel(application),
+    InterfaceWeatherViewModel {
+    private var _locationModel = MutableStateFlow<LocationModel?>(null)
+    override val locationModel: StateFlow<LocationModel?> = _locationModel
 
-    override fun updateLocation(lon: Float, lat: Float) {
-        fetchWeatherData(lon, lat)
-    }
+    private val locationService = GeolocationService(application)
+    private val repository = WeatherRepositoryOpenMeteo(locationService)
 
-    //private val repository = WeatherRepositoryDemo()
-    private val repository = WeatherRepositoryOpenMeteo()
-    private fun fetchWeatherData(lat: Float, lon: Float) {
+    override fun updateLocationByName(address: String) {
         viewModelScope.launch {
-            val data = repository.getWeatherData(lat, lon)
-            _weeklyForecast.value = data
-            Log.e("API_DATA", "$data")
+            val data = repository.getWeatherDataByAddress(address)
+            _locationModel.value = data
+            if (data == null) {
+                Log.w("WeatherViewModel", "No data found for $address")
+            }
         }
     }
 }
 
 
 class FakeViewModelInterface : InterfaceWeatherViewModel {
-    override val weeklyForecast: StateFlow<List<WeatherModel>> =
-        MutableStateFlow(
-            listOf(
+    override val locationModel: StateFlow<LocationModel> = MutableStateFlow(
+        LocationModel(
+            locationName = "Stockholm, Sweden", hourlyWeather = listOf(
                 WeatherModel(1f, Date(), "Snowy", R.drawable.ic_26_snoefall),
                 WeatherModel(2f, Date(), "Cloudy", R.drawable.ic_04_molnigt),
                 WeatherModel(3f, Date(), "Sunny", R.drawable.ic_01_klart),
@@ -48,7 +58,7 @@ class FakeViewModelInterface : InterfaceWeatherViewModel {
                 WeatherModel(5f, Date(), "Thunderstorm", R.drawable.ic_21_aaska),
             )
         )
+    )
 
-    override fun updateLocation(lon: Float, lat: Float) {
-    }
+    override fun updateLocationByName(address: String) {}
 }

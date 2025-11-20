@@ -10,6 +10,13 @@ import kotlinx.coroutines.withContext
 import java.util.Locale
 import kotlin.coroutines.resume
 
+/**
+ * A service class responsible for handling location-based operations
+ * It uses the Android Geocoder to get location data.
+ *
+ * @author Simonms
+ *
+ */
 data class Coordinates(val latitude: Double, val longitude: Double)
 
 class GeolocationService(context: Context) {
@@ -75,9 +82,18 @@ class GeolocationService(context: Context) {
     }
 
     private fun formatAddress(address: Address): String {
-        val city = address.locality ?: address.subAdminArea ?: "Unknown area"
+        val locationName = address.locality
+            ?: address.subAdminArea
+            ?: address.adminArea
+            ?: address.featureName
+            ?: "Unknown Area"
         val country = address.countryName ?: ""
-        Log.d("LocationService", "Found address: $city, $country")
-        return "$city, $country"
+        Log.d("LocationService", "Found address: $locationName, $country")
+
+        return if (locationName != "Unknown Area" && country.isNotBlank()) {
+            "$locationName, $country"
+        } else {
+            locationName
+        }
     }
 }

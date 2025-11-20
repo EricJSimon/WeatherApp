@@ -8,6 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 
+/**
+ * Component Input field used for longitude and latitude coordinates
+ *
+ * @author Simonms
+ *
+ */
 @Composable
 fun FloatInputField(
     value: String,

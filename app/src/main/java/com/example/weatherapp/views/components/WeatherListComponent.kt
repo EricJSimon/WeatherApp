@@ -24,6 +24,12 @@ import com.example.weatherapp.R
 import com.example.weatherapp.models.WeatherModel
 import java.util.Date
 
+/**
+ * Component for the weather list.
+ *
+ * @author Simonms
+ *
+ */
 @Composable
 fun WeatherListComponent(
     modifier: Modifier = Modifier, forecastData: List<WeatherModel>

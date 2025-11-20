@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -31,19 +32,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.viewModels.FakeViewModelInterface
 import com.example.weatherapp.viewModels.InterfaceWeatherViewModel
-import com.example.weatherapp.views.components.FloatInputField
 import com.example.weatherapp.views.components.WeatherListComponent
 
+/**
+ * Main HomeScreen for this APP
+ *
+ * @author Simonms
+ *
+ */
 @Composable
 fun HomeScreen(weatherViewModel: InterfaceWeatherViewModel) {
-    val forecast by weatherViewModel.weeklyForecast.collectAsState()
+    val forecast by weatherViewModel.locationModel.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
-    var lonText by remember { mutableStateOf("") }
-    var latText by remember { mutableStateOf("") }
-
-
-    val isButtonEnabled = lonText.isNotBlank() && latText.isNotBlank()
+    var addressText by remember { mutableStateOf("") }
+    val isButtonEnabled = addressText.isNotBlank()
 
     Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }, bottomBar = {
         Row(
@@ -54,30 +57,16 @@ fun HomeScreen(weatherViewModel: InterfaceWeatherViewModel) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatInputField(
-                value = lonText,
-                onValueChange = { lonText = it },
-                label = "Longitude",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            )
-
-            FloatInputField(
-                value = latText,
-                onValueChange = { latText = it },
-                label = "Latitude",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
+            OutlinedTextField(
+                value = addressText,
+                onValueChange = { addressText = it },
+                label = { Text("City, Country") },
+                modifier = Modifier.weight(1f),
+                singleLine = true
             )
             Button(
                 onClick = {
-                    val lon = lonText.toFloatOrNull()
-                    val lat = latText.toFloatOrNull()
-                    if (lon != null && lat != null) {
-                        weatherViewModel.updateLocation(lon, lat)
-                    }
+                    weatherViewModel.updateLocationByName(addressText)
                 },
                 enabled = isButtonEnabled,
                 shape = RoundedCornerShape(10),
@@ -92,20 +81,20 @@ fun HomeScreen(weatherViewModel: InterfaceWeatherViewModel) {
         }
     }) { innerPadding ->
         Box(
-            modifier = Modifier
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.padding(innerPadding), contentAlignment = Alignment.Center
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "7-Day Forecast",
+                    text = forecast?.locationName ?: "Weather Forecast",
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(16.dp)
                 )
-                WeatherListComponent(forecastData = forecast)
+                forecast?.hourlyWeather?.let { weatherList ->
+                    WeatherListComponent(forecastData = weatherList)
+                }
             }
         }
     }

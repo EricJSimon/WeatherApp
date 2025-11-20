@@ -2,8 +2,10 @@ package com.example.weatherapp.repositories
 
 import android.util.Log
 import com.example.weatherapp.R
+import com.example.weatherapp.models.LocationModel
 import com.example.weatherapp.models.WeatherModel
 import com.example.weatherapp.models.network.OpenMeteoResponse
+import com.example.weatherapp.services.GeolocationService
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -14,7 +16,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class WeatherRepositoryOpenMeteo {
+/**
+ * This is using Open Meteo API to request weather data
+ * https://open-meteo.com/ Weather data by Open-Meteo.com
+ *
+ * @author Simonms
+ *
+ */
+class WeatherRepositoryOpenMeteo(private val locationService: GeolocationService) {
 
     private val client = HttpClient {
         install(ContentNegotiation) {
@@ -25,19 +34,38 @@ class WeatherRepositoryOpenMeteo {
         }
     }
 
-    suspend fun getWeatherData(lon: Float, lat: Float): List<WeatherModel> {
+    suspend fun getWeatherDataByAddress(address: String): LocationModel? {
+        val coordinates = locationService.getLonLat(address)
+
+        return if (coordinates != null) {
+            getWeatherDataByCoordinates(
+                lat = coordinates.latitude.toFloat(),
+                lon = coordinates.longitude.toFloat()
+            )
+        } else {
+            Log.w("WeatherRepository", "Could not find coordinates for address: $address")
+            null
+        }
+    }
+
+    private suspend fun getWeatherDataByCoordinates(lon: Float, lat: Float): LocationModel? {
         val url =
             "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&hourly=temperature_2m,weather_code"
-        Log.d("API_URL",url)
+        Log.d("API_URL", url)
 
-        try {
-            val apiResponse = client.get(url).body<OpenMeteoResponse>()
+        return try {
+            val weatherResponse = client.get(url).body<OpenMeteoResponse>()
+            val hourlyWeather = mapOpenMeteoResponseToWeatherModel(weatherResponse)
 
-            return mapOpenMeteoResponseToWeatherModel(apiResponse)
+            val locationName = locationService.getLocationName(lat.toDouble(), lon.toDouble())
+
+            LocationModel(
+                locationName = locationName,
+                hourlyWeather = hourlyWeather
+            )
         } catch (e: Exception) {
-            Log.e("API_ERROR_REQUEST", "url request failed", e)
-            e.printStackTrace()
-            return emptyList()
+            Log.e("API_ERROR_REQUEST","URL request failed for coordinates: ($lat, $lon)",e)
+            null
         }
     }
 

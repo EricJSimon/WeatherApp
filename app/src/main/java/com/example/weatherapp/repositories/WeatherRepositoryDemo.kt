@@ -15,6 +15,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * This is using the DEMO website
+ * to get data by a HTTP request
+ *
+ * @author Simonms
+ */
 class WeatherRepositoryDemo {
 
     private val client = HttpClient {

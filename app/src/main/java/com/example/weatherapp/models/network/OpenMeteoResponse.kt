@@ -3,6 +3,12 @@ package com.example.weatherapp.models.network
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * This is a model of Open Meteo API response data.
+ * This will only handle time, temperature_2m and weather_code
+ *
+ * @author Simonms
+ */
 @Serializable
 data class OpenMeteoResponse(
     val latitude: Float,
